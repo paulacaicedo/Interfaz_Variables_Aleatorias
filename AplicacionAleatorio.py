@@ -355,31 +355,26 @@ def histograma(datos):
  
 #----------------------------------------------------------------------
 
-
+ 
 
 def algoritmo(event):
     
-     
     
-    global grados_1
-    global grados_2
     
     global entrada_grados_1
     global entrada_grados_2
     
-    grados_1 = tk.StringVar()
-    grados_2 = tk.StringVar()
+    global gr_1
+    global gr_2
     
-    entrada_grados_1 = ttk.Label(master, text="Grados Libertad 1:")
+
+     
     entrada_grados_1.place_forget()
-    
-    entrada_grados_2 = ttk.Label(master, text="Grados Libertad 2:")
     entrada_grados_2.place_forget()
     
     
-    gr_1 = ttk.Entry(master,textvariable=grados_1)
+     
     gr_1.place_forget()
-    gr_2 = ttk.Entry(master,textvariable=grados_2)
     gr_2.place_forget()
      
     
@@ -409,12 +404,7 @@ def algoritmo(event):
         entrada_grados_2.grid_remove()
         
        
-    
-     
 
-    
-    
-    
 #---------------------------------------------------------------------------------
 
  
@@ -666,7 +656,7 @@ combo = ttk.Combobox(master,textvariable=aleatoria,
 combo.place(x=30, y=60) 
 
 
-combo.bind("<<ComboboxSelected>>",algoritmo)
+ 
 
 
 
@@ -680,6 +670,18 @@ combo_1 = ttk.Combobox(master,
 combo_1.place(x=250, y=60) 
 
 
+entrada_grados_1 = ttk.Label(master, text="Grados Libertad 1:")
+entrada_grados_2 = ttk.Label(master, text="Grados Libertad 2:")
+
+global grados_1
+global grados_2
+
+grados_1 = tk.StringVar()
+grados_2 = tk.StringVar()
+
+
+gr_1 = ttk.Entry(master,textvariable=grados_1)
+gr_2 = ttk.Entry(master,textvariable=grados_2)
  
 
 #CANTIDAD A GENERAR
@@ -717,5 +719,9 @@ primer_grafico.place(x=30, y=220)
 #BOTON DE GRAFICA
 button = tk.Button(master,text = 'Graficar', command = graficar)
 button.place(x=390, y=220) 
+
+
+combo.bind("<<ComboboxSelected>>",algoritmo)
+
 
 master.mainloop()
