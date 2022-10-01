@@ -6,7 +6,7 @@ This is a temporary script file.
 """
 
 
-
+import matplotlib.pyplot as plt
 import math as ma
 import numpy as np
 import tkinter as tk
@@ -26,13 +26,12 @@ import matplotlib.pyplot as plot
  
 
 #DATOS GENERALES DE USO
-media = 10;
-desviacion = 2;
+media = 10
+desviacion = 2
 tasa = 0.5
-Escala = 2;
+Escala = 0.3
 Forma = 5
-teta=4.5
-a=25
+
 
 #Funciones
 
@@ -58,7 +57,7 @@ def visual_basic(semilla, cantidad):
     m = ma.pow(2, 24)
     xi = semilla
     for i in range(0,cantidad):
-        temp = int((a*xi)%m)
+        temp = int((1140671485*(xi)+12820163)% m)
         r = temp / (m-1)
         ri.append(r)
         xi = temp
@@ -73,17 +72,68 @@ def fortran(semilla, cantidad):
     
     xi = semilla
     for i in range(0,cantidad):
-        temp = int((1140671485*(xi)+12820163)% ma.pow(2, 24))
-        r = int(630360016*(temp) % (ma.pow(2, 31)-1))
         
-        xi = temp
-        ri.append(float('0.'+str(r)))
+        r = int(630360016*(xi) % (ma.pow(2, 31)-1))
+        temp = r / ((ma.pow(2, 31)-1)-1)
+        
+        xi = r
+        
+        
+        ri.append(temp)
         
         
     return ri   
      
     
 
+def ObtenerLaMitad(seed, length):
+    seedLength = len(str(seed))
+    if seedLength == 0:
+        return 0
+    
+    # Right elimination
+    seed = str(seed)[0:seedLength - 1]
+    seedLength = len(str(seed))
+    if seedLength == length:
+        return int(seed)
+    
+    # Left elimination
+    seed = str(seed)[1: seedLength]
+    seedLength = len(str(seed))
+    if seedLength == length:
+        return int(seed)
+    
+    return ObtenerLaMitad(seed, length)
+
+def CalculateRandom(number, length):
+    return number / ma.pow(10, length)
+
+def ProductosMedios(xi, xi_1, length, total, randomNumbers = []):
+    if total == 0:
+        return randomNumbers
+    
+    x = xi * xi_1
+    
+    medio = ObtenerLaMitad(x, length)
+    randomNumbers.append(CalculateRandom(medio, length))
+    
+    return ProductosMedios(xi_1, medio, length, total - 1, randomNumbers)
+
+def CuadradosMedios(seed, length, total):
+    randomNumbers = []
+    
+    for i in range(0, total):    
+        square = seed * seed
+        
+        medio = ObtenerLaMitad(square, length)
+        if medio == 0:
+            return randomNumbers
+        
+        seed = medio
+        randomNumbers.append(CalculateRandom(medio, length))
+    
+    return randomNumbers
+ 
 
 #PRIMERO FUNCIONES QUE REALIZAN LAS DISTRIBUCIONES
 
@@ -272,14 +322,15 @@ def dist_Exponencial(r1,r2):
 
 
 def dist_gamma(r1,r2):
-    
-    
+
+
+    tetta = 4.5
     di = []
     
-    b = Forma * (-ma.log(4))
-    q =  1/ Forma
-    d = 1 + ma.log(teta)
-    a_1 = (1/(ma.sqrt(2*Forma-1)))
+    b = Forma - np.log10(4)
+    q =  Forma + (1/ Forma)
+    d = 1 + np.log(tetta)
+    a_1 = 1/(np.sqrt(2*Forma-1))
     
     
     # HALLAR VI, ZI, WI, YI
@@ -290,7 +341,7 @@ def dist_gamma(r1,r2):
     wi = []
     
     for i in range(0,len(r1)):
-        v1 = a_1* (ma.log(r1[i]/(1-r2[i])))
+        v1 = a_1* (np.log10(r1[i]/(1-r2[i])))
         vi.append(v1)
     
     for i in range(0,len(r1)):
@@ -302,24 +353,23 @@ def dist_gamma(r1,r2):
         yi.append(y1)
         
     for i in range(0,len(vi)):
-        w1 = b + q*vi[i] - yi[i]
+        w1 = b + (q*vi[i]) - yi[i]
         wi.append(w1)
         
     for i in range(0,len(wi)):
-        x = (wi[i] + d) - (teta*zi[i])
+        x = (wi[i] + d) - (tetta*zi[i])
 
         if(x>0):
-            print('si')
-            d1 = Escala * y1
-            di.append(d1)
+            
+            d1_1 = Escala * yi[i]
+            di.append(d1_1)
         else:
-            print('aca')
             if(w1 >= (ma.log10(z1))):
-                print('si')
-                d1 = Escala * y1
+              
+                d1 = Escala * yi[i]
                 di.append(d1)
         
-
+   
     return di
             
         
@@ -336,9 +386,8 @@ def histograma(datos):
     #Figure(figsize=(5, 4), dpi=100) 
     fig = Figure(figsize=(5, 4), dpi=100)
     ax = fig.add_subplot(111)
-    ax.hist(x=datos)
+    ax.hist(datos, 90)
     
-
     canvas = FigureCanvasTkAgg(fig, funcion)
     canvas.draw()
     canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
@@ -426,7 +475,7 @@ def graficar():
     re = ''.join(reversed(str(variable_semilla.get())))
     
     if(seleccion_aleatoria == "Dist.Normal BoxMuller"):
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
             r1 = visual_basic(sem,can)
             r2 = visual_basic((int(re)+1),can)
 
@@ -436,7 +485,7 @@ def graficar():
             
             
              
-        if(seleccion_generador == "Fortran"):
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             r1 = fortran(sem,can)
             r2 = fortran((int(re)+1),can)
 
@@ -450,7 +499,7 @@ def graficar():
         
     if(seleccion_aleatoria == "Distribucion Log-Normal"):
         print('Log Normal')
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
             r1 = visual_basic(sem,can)
             r2 = visual_basic((int(re)+1),can)
 
@@ -461,7 +510,7 @@ def graficar():
             
             
             
-        if(seleccion_generador == "Fortran"):
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             r1 = fortran(sem,can)
             r2 = fortran((int(re)+1),can)
 
@@ -474,7 +523,7 @@ def graficar():
      
     if(seleccion_aleatoria == "Distribucion Exponencial"):
        print('Exponencial')
-       if(seleccion_generador == "VisualBasic"):
+       if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
            r1 = visual_basic(sem,can)
            r2 = visual_basic((int(re)+1),can)
 
@@ -485,7 +534,7 @@ def graficar():
            
            
            
-       if(seleccion_generador == "Fortran"):
+       if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
            r1 = fortran(sem,can)
            r2 = fortran((int(re)+1),can)
 
@@ -501,7 +550,7 @@ def graficar():
         g_1 = int(grados_1.get())
          
         
-        if(seleccion_generador == "Fortran"):
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             r1 = fortran(sem,can)
             r2 = fortran((int(re)+1),can)
 
@@ -510,7 +559,7 @@ def graficar():
            
             if(valor == 1): histograma(xi)
         
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
             
            r1 = visual_basic(sem,can)
            r2 = visual_basic((int(re)+1),can)
@@ -529,7 +578,7 @@ def graficar():
         
         g_1 = int(grados_1.get())
         
-        if(seleccion_generador == "Fortran"):
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             r1 = fortran(sem,can)
             r2 = fortran((int(re)+1),can)
 
@@ -539,7 +588,7 @@ def graficar():
             if(valor == 1): histograma(xi)
          
         
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
            r1 = visual_basic(sem,can)
            r2 = visual_basic((int(re)+1),can)
            
@@ -556,7 +605,7 @@ def graficar():
         g_2 = int(grados_2.get())
         
         print('Distribucion F')
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
            r1 = visual_basic(sem,can)
            r2 = visual_basic((sem * sem),can)
            
@@ -569,7 +618,7 @@ def graficar():
            if(valor == 1): histograma(xi)
            
            
-        if(seleccion_generador == "Fortran"):
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             
             r1 = visual_basic(sem,can)
             r2 = visual_basic((int(re)+1),can)
@@ -586,44 +635,28 @@ def graficar():
     #----------------------------------------------------------------
     if(seleccion_aleatoria == "Distribucion Gamma"):
          
-        if(seleccion_generador == "VisualBasic"):
+        if(seleccion_generador == "VisualBasic" or seleccion_generador == "Productos Medios"):
             
             
             
             r1 = visual_basic(sem,can)
-            r2 = visual_basic((int(re)+1),can)
+            r2 = visual_basic((int(re)+15),can)
 
             xi = dist_gamma(r1,r2)
             
-            while(len(xi)==can):
-                
-                print('aca')
-                
-                np.random.seed(sem+5)
-                x = np.random.rand()*10
-                
-                print(x)
-                
-                r1 = visual_basic(x,can)
-                r2 = visual_basic((int(re)+1),can)
-                
-                print(x)
-                xi = dist_gamma(r1,r2)
-            
-            print(xi)
            
             if(valor == 1): histograma(xi)
             
-        if(seleccion_generador == "Fortran"):
+            
+        if(seleccion_generador == "Fortran" or seleccion_generador == "Cuadros Medios"):
             
             r1 = fortran(sem,can)
             r2 = fortran((int(re)+1),can)
             
-            print(r1)
-            print(r2)
+           
             
             xi = dist_gamma(r1,r2)
-            print(xi)
+         
             
            
             if(valor == 1): histograma(xi)
@@ -666,6 +699,8 @@ label_combo_1.place(x=250, y=40)
 combo_1 = ttk.Combobox(master,
                        values = ["VisualBasic",
                                     "Fortran",
+                                    "Productos Medios",
+                                    "Cuadros Medios"
                                     ],state="readonly")
 combo_1.place(x=250, y=60) 
 
@@ -725,3 +760,6 @@ combo.bind("<<ComboboxSelected>>",algoritmo)
 
 
 master.mainloop()
+
+ 
+ 
